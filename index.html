@@ -457,9 +457,11 @@
                 isPlaying = true;
                 document.getElementById('play-btn').textContent = '⏸';
                 startProgressTracking();
+                updateMediaSession('playing');
             } else if (event.data === YT.PlayerState.PAUSED) {
                 isPlaying = false;
                 document.getElementById('play-btn').textContent = '▶';
+                updateMediaSession('paused');
             }
         }
 
@@ -563,7 +565,25 @@
             document.title = track.title + ' — Playlist Randomizer';
 
             updateQueueHighlight();
+            updateMediaSession('playing', track);
             ytPlayer.loadVideoById(track.videoId);
+        }
+
+        function updateMediaSession(state, track) {
+            if (!('mediaSession' in navigator)) return;
+            const t = track || playlist[currentIndex];
+            if (t) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: t.title,
+                    artist: t.channel,
+                    artwork: t.thumbnail ? [{ src: t.thumbnail }] : []
+                });
+            }
+            navigator.mediaSession.playbackState = state;
+            navigator.mediaSession.setActionHandler('play', () => { ytPlayer?.playVideo(); });
+            navigator.mediaSession.setActionHandler('pause', () => { ytPlayer?.pauseVideo(); });
+            navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+            navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
         }
 
         function togglePlay() {

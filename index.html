@@ -207,6 +207,58 @@
 
         .ctrl-btn.active { color: var(--accent); }
 
+        /* Volume */
+        .volume-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vol-icon {
+            font-size: 16px;
+            cursor: pointer;
+            user-select: none;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--surface2);
+            outline: none;
+            cursor: pointer;
+            flex: unset;
+            padding: 0;
+            border: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+        }
+
         /* Queue */
         .queue {
             background: var(--surface);
@@ -386,7 +438,10 @@
                     <button class="ctrl-btn" onclick="prevTrack()" title="Previous">⏮</button>
                     <button class="ctrl-btn play-btn" id="play-btn" onclick="togglePlay()">▶</button>
                     <button class="ctrl-btn" onclick="nextTrack()" title="Next">⏭</button>
-                    <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()" title="Mute">🔊</button>
+                    <div class="volume-group">
+                        <span class="vol-icon" id="vol-icon" onclick="toggleMute()">🔊</span>
+                        <input type="range" id="volume-slider" min="0" max="100" value="100" oninput="setVolume(this.value)" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -592,15 +647,28 @@
             setTimeout(() => setStatus(`${playlist.length} tracks`), 1500);
         }
 
-        function toggleMute() {
+        function setVolume(val) {
             if (!ytPlayer) return;
-            const btn = document.getElementById('mute-btn');
-            if (ytPlayer.isMuted()) {
-                ytPlayer.unMute();
-                btn.textContent = '🔊';
-            } else {
+            const v = parseInt(val);
+            ytPlayer.setVolume(v);
+            if (v === 0) {
                 ytPlayer.mute();
-                btn.textContent = '🔇';
+            } else {
+                ytPlayer.unMute();
+            }
+            document.getElementById('vol-icon').textContent = v === 0 ? '🔇' : v < 50 ? '🔉' : '🔊';
+        }
+
+        function toggleMute() {
+            const slider = document.getElementById('volume-slider');
+            if (ytPlayer && ytPlayer.isMuted()) {
+                const restored = parseInt(slider.dataset.prev || '100');
+                slider.value = restored;
+                setVolume(restored);
+            } else {
+                slider.dataset.prev = slider.value;
+                slider.value = 0;
+                setVolume(0);
             }
         }
 
@@ -723,7 +791,7 @@
             if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
             if (e.code === 'ArrowRight') nextTrack();
             if (e.code === 'ArrowLeft') prevTrack();
-            if (e.code === 'KeyM') toggleMute();
+            if (e.code === 'KeyM') { e.preventDefault(); toggleMute(); }
         });
 
         // ── Helpers ──

@@ -355,44 +355,7 @@
 
         .status.error { color: var(--accent); }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .modal-overlay.visible { display: flex; }
-
-        .modal {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 24px;
-            width: min(400px, 90vw);
-        }
-
-        .modal h2 { font-size: 15px; margin-bottom: 8px; }
-
-        .modal p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-
-        .modal input { width: 100%; margin-bottom: 12px; flex: unset; }
-
-        .modal-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        /* Hidden YouTube player */
+/* Hidden YouTube player */
         #yt-player-container {
             position: fixed;
             left: -9999px;
@@ -413,7 +376,6 @@
         </div>
 
         <div class="status-row">
-            <button class="btn-ghost" style="font-size:13px;padding:8px 14px;" onclick="showSettings()">⚙ API Key</button>
             <span id="status" class="status"></span>
         </div>
 
@@ -455,19 +417,7 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal">
-            <h2>YouTube Data API Key</h2>
-            <p>Required to fetch playlist videos. Your key is stored only in your browser (localStorage) and sent only to YouTube's API.</p>
-            <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off" />
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
-                <button onclick="saveSettings()">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="yt-player-container">
+<div id="yt-player-container">
         <div id="yt-player"></div>
     </div>
 
@@ -479,7 +429,7 @@
         let progressInterval = null;
         let isPlaying = false;
 
-        const getApiKey = () => localStorage.getItem('ytApiKey') || '';
+        const getApiKey = () => 'AIzaSyDdlDRXvLN7LcXxyTNyv2Eg2zksrlZIElI';
 
         // ── YouTube IFrame API ──
         (function () {
@@ -759,33 +709,7 @@
             if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
 
-        // ── Settings ──
-        function showSettings() {
-            document.getElementById('api-key-input').value = getApiKey();
-            document.getElementById('settings-modal').classList.add('visible');
-        }
-
-        function closeSettings() {
-            document.getElementById('settings-modal').classList.remove('visible');
-        }
-
-        function saveSettings() {
-            const key = document.getElementById('api-key-input').value.trim();
-            if (key) localStorage.setItem('ytApiKey', key);
-            else localStorage.removeItem('ytApiKey');
-            closeSettings();
-            if (key) setStatus('API key saved');
-        }
-
-        document.getElementById('settings-modal').addEventListener('click', e => {
-            if (e.target === e.currentTarget) closeSettings();
-        });
-
-        document.getElementById('api-key-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') saveSettings();
-        });
-
-        // ── Keyboard shortcuts ──
+// ── Keyboard shortcuts ──
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT') return;
             if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
@@ -815,7 +739,6 @@
             if (e.key === 'Enter') handleLoad();
         });
 
-        if (!getApiKey()) setStatus('Set your API key to get started');
     </script>
 </body>
 </html>
